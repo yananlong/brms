@@ -962,7 +962,7 @@ stan_sp <- function(bframe, prior, stanvars, threads, normalize, ...) {
   if (length(invalid_coef)) {
     stop2(
       "Special group-level terms require corresponding ",
-      "population-level terms:\nOccured for ",
+      "population-level terms:\nOccurred for ",
       collapse_comma(invalid_coef)
     )
   }

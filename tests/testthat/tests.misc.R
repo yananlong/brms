@@ -18,11 +18,11 @@ test_that("rmNULL removes all NULL entries", {
 
 test_that("rename returns an error on duplicated names", {
   expect_error(rename(c(letters[1:4],"a()","a["), check_dup = TRUE), fixed = TRUE,
-               paste("Occured for: 'a', 'a()', 'a['"))
+               paste("Occurred for: 'a', 'a()', 'a['"))
   expect_error(rename(c("aDb","a/b","b"), check_dup = TRUE), fixed = TRUE,
-               paste("Occured for: 'aDb', 'a/b'"))
+               paste("Occurred for: 'aDb', 'a/b'"))
   expect_error(rename(c("log(a,b)","logab","bac","ba"), check_dup = TRUE), fixed = TRUE,
-               paste("Occured for: 'log(a,b)', 'logab'"))
+               paste("Occurred for: 'log(a,b)', 'logab'"))
 })
 
 test_that("rename perform correct renaming", {

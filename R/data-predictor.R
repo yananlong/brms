@@ -509,7 +509,7 @@ data_Xme <- function(bframe, data) {
               length(unique(noise[take])) > 1L) {
             stop2(
               "Measured values and measurement error should be ",
-              "unique for each group. Occured for level '",
+              "unique for each group. Occurred for level '",
               levels[l], "' of group '", g, "'."
             )
           }

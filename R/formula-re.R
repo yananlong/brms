@@ -655,7 +655,7 @@ frame_re <- function(bterms, data, old_levels = NULL) {
     dr <- out[which(dup)[1], ]
     stop2(
       "Duplicated group-level effects are not allowed.\n",
-      "Occured for effect '", dr$coef, "' of group '", dr$group, "'."
+      "Occurred for effect '", dr$coef, "' of group '", dr$group, "'."
     )
   }
   if (has_rows(out)) {

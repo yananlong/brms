@@ -620,7 +620,7 @@ rename <- function(x, pattern = NULL, replacement = NULL,
     dup <- x[out %in% out[dup]]
     stop2("Internal renaming led to duplicated names. ",
           "Consider renaming your variables to have different suffixes.\n",
-          "Occured for: ", collapse_comma(dup))
+          "Occurred for: ", collapse_comma(dup))
   }
   out
 }
