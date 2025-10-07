@@ -2086,8 +2086,8 @@ pmixcure_weibull <- function(q, shape, scale, inc, lower.tail = TRUE, log.p = FA
   # compute log CCDF values
   # latency part (right-censored): [1 - pi(z)] + pi(z) * S(t | x)
   out <- matrixStats::logSumExp(c(
-    1, -inc,
-    inc + do_call(cdf, c(list(q), pars, lower.tail = FALSE, log.p = TRUE))
+    log1p(-inc),
+    log(inc) + do_call(cdf, c(list(q), pars, lower.tail = FALSE, log.p = TRUE))
   ))
   out <- ifelse(q < lb, 0, out)
   out <- ifelse(q > ub, -Inf, out)
