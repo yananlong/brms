@@ -185,6 +185,90 @@ test_that("zero-inflated distribution functions run without errors", {
   expect_true(length(res) == n)
 })
 
+test_that("pmixcure_lognormal matches its analytical mixture", {
+  q <- c(-0.3, 0.5, 2)
+  mu <- c(-0.5, 0.1, 0.8)
+  sigma <- c(0.4, 0.7, 1.3)
+  inc <- c(0.05, 0.5, 0.85)
+
+  latency_lower <- plnorm(q, meanlog = mu, sdlog = sigma)
+  latency_log_lower <- plnorm(q, meanlog = mu, sdlog = sigma, log.p = TRUE)
+  latency_upper <- plnorm(q, meanlog = mu, sdlog = sigma, lower.tail = FALSE)
+
+  expect_equal(
+    pmixcure_lognormal(q, mu = mu, sigma = sigma, inc = inc),
+    inc * latency_lower,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_lognormal(q, mu = mu, sigma = sigma, inc = inc, log.p = TRUE),
+    log(inc) + latency_log_lower,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_lognormal(q, mu = mu, sigma = sigma, inc = inc, lower.tail = FALSE),
+    (1 - inc) + inc * latency_upper,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_lognormal(
+      q,
+      mu = mu,
+      sigma = sigma,
+      inc = inc,
+      lower.tail = FALSE,
+      log.p = TRUE
+    ),
+    log1p(-inc * latency_lower),
+    tolerance = 1e-12
+  )
+})
+
+test_that("pmixcure_weibull matches its analytical mixture", {
+  q <- c(0, 0.8, 3.5)
+  shape <- c(1.2, 0.9, 2)
+  scale <- c(0.7, 1.5, 2.3)
+  inc <- c(0.15, 0.45, 0.95)
+
+  latency_lower <- pweibull(q, shape = shape, scale = scale)
+  latency_log_lower <- pweibull(q, shape = shape, scale = scale, log.p = TRUE)
+  latency_upper <- pweibull(q, shape = shape, scale = scale, lower.tail = FALSE)
+
+  expect_equal(
+    pmixcure_weibull(q, shape = shape, scale = scale, inc = inc),
+    inc * latency_lower,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_weibull(q, shape = shape, scale = scale, inc = inc, log.p = TRUE),
+    log(inc) + latency_log_lower,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_weibull(q, shape = shape, scale = scale, inc = inc, lower.tail = FALSE),
+    (1 - inc) + inc * latency_upper,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    pmixcure_weibull(
+      q,
+      shape = shape,
+      scale = scale,
+      inc = inc,
+      lower.tail = FALSE,
+      log.p = TRUE
+    ),
+    log1p(-inc * latency_lower),
+    tolerance = 1e-12
+  )
+})
+
 test_that("hurdle distribution functions run without errors", {
   n <- 10
   x <- rpois(n, lambda = 1)
