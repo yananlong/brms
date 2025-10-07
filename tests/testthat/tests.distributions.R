@@ -113,6 +113,51 @@ test_that("inv_gaussian distribution functions run without errors", {
   expect_true(length(res) == n)
 })
 
+test_that("mixcure lognormal distribution functions match analytical forms", {
+  q <- c(-0.5, 0.2, 1.5)
+  mu <- c(0.1, -0.2, 0.3)
+  sigma <- c(0.6, 0.8, 1.1)
+  inc <- c(0.2, 0.5, 0.8)
+
+  latency_cdf <- plnorm(q, meanlog = mu, sdlog = sigma)
+  latency_surv <- plnorm(q, meanlog = mu, sdlog = sigma, lower.tail = FALSE)
+  mix_cdf <- inc * latency_cdf
+  mix_surv <- (1 - inc) + inc * latency_surv
+
+  expect_equal(pmixcure_lognormal(q, mu, sigma, inc), mix_cdf)
+  expect_equal(pmixcure_lognormal(q, mu, sigma, inc, log.p = TRUE), log(mix_cdf))
+  expect_equal(
+    pmixcure_lognormal(q, mu, sigma, inc, lower.tail = FALSE),
+    mix_surv
+  )
+  expect_equal(
+    pmixcure_lognormal(q, mu, sigma, inc, lower.tail = FALSE, log.p = TRUE),
+    log(mix_surv)
+  )
+})
+
+test_that("mixcure Weibull distribution functions match analytical forms", {
+  q <- c(-0.5, 0.2, 1.5)
+  inc <- c(0.2, 0.5, 0.8)
+  shape <- c(1.3, 2.1, 0.9)
+  scale <- c(0.7, 1.2, 0.5)
+  latency_cdf_w <- pweibull(q, shape = shape, scale = scale)
+  latency_surv_w <- pweibull(q, shape = shape, scale = scale, lower.tail = FALSE)
+  mix_cdf_w <- inc * latency_cdf_w
+  mix_surv_w <- (1 - inc) + inc * latency_surv_w
+
+  expect_equal(pmixcure_weibull(q, shape, scale, inc), mix_cdf_w)
+  expect_equal(pmixcure_weibull(q, shape, scale, inc, log.p = TRUE), log(mix_cdf_w))
+  expect_equal(
+    pmixcure_weibull(q, shape, scale, inc, lower.tail = FALSE),
+    mix_surv_w
+  )
+  expect_equal(
+    pmixcure_weibull(q, shape, scale, inc, lower.tail = FALSE, log.p = TRUE),
+    log(mix_surv_w)
+  )
+})
+
 test_that("beta_binomial distribution functions run without errors", {
   skip_if_not_installed("extraDistr")
 
