@@ -327,13 +327,13 @@ stan_log_lik_simple_lpdf <- function(lpdf, bterms, sep = "_") {
 }
 
 # prepare _logit suffix for distributional parameters
-# used in zero-inflated and hurdle models
+# used in zero-inflated, hurdle, and mixcure models
 stan_log_lik_dpar_usc_logit <- function(bterms, dpar) {
   stopifnot(is.brmsterms(bterms))
-  stopifnot(dpar %in% c("zi", "hu"))
+  stopifnot(dpar %in% c("zi", "hu", "inc"))
   has_cens_or_trunc <- has_ad_terms(bterms, c("cens", "trunc"))
   usc_logit <- isTRUE(bterms$dpars[[dpar]]$family$link == "logit")
-  str_if(usc_logit && !has_cens_or_trunc, "_logit")
+  str_if(usc_logit && (!has_cens_or_trunc || dpar == "inc"), "_logit")
 }
 
 # add 'se' to 'sigma' within the Stan likelihood
@@ -874,6 +874,21 @@ stan_log_lik_hurdle_lognormal <- function(bterms, ...) {
   usc_logit <- stan_log_lik_dpar_usc_logit(bterms, "hu")
   lpdf <- paste0("hurdle_lognormal", usc_logit)
   sdist(lpdf, p$mu, p$sigma, p$hu, vec = FALSE)
+}
+
+stan_log_lik_mixcure_lognormal <- function(bterms, ...) {
+  p <- stan_log_lik_dpars(bterms, reqn = TRUE)
+  usc_logit <- stan_log_lik_dpar_usc_logit(bterms, "inc")
+  lpdf <- paste0("mixcure_lognormal", usc_logit)
+  sdist(lpdf, p$mu, p$sigma, p$inc, vec = FALSE)
+}
+
+stan_log_lik_mixcure_weibull <- function(bterms, ...) {
+  p <- stan_log_lik_dpars(bterms, reqn = TRUE)
+  usc_logit <- stan_log_lik_dpar_usc_logit(bterms, "inc")
+  lpdf <- paste0("mixcure_weibull", usc_logit)
+  scale <- paste0(p$mu, " ./ tgamma(1 + 1 ./ ", p$shape, ")")
+  sdist(lpdf, scale, p$shape, p$inc, vec = FALSE)
 }
 
 stan_log_lik_hurdle_cumulative <- function(bterms, ...) {

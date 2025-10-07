@@ -730,6 +730,26 @@ log_lik_hurdle_lognormal <- function(i, prep) {
   log_lik_weight(out, i = i, prep = prep)
 }
 
+log_lik_mixcure_lognormal <- function(i, prep) {
+  inc <- get_dpar(prep, "inc", i)
+  mu <- get_dpar(prep, "mu", i)
+  sigma <- get_dpar(prep, "sigma", i)
+  args <- nlist(mu, sigma, inc)
+  out <- log_lik_censor("mixcure_lognormal", args, i, prep)
+  out <- log_lik_truncate(out, pmixcure_lognormal, args, i, prep)
+  log_lik_weight(out, i = i, prep = prep)
+}
+
+log_lik_mixcure_weibull <- function(i, prep) {
+  inc <- get_dpar(prep, "inc", i)
+  shape <- get_dpar(prep, "shape", i = i)
+  scale <- get_dpar(prep, "mu", i) / gamma(1 + 1 / shape)
+  args <- nlist(shape, scale, inc)
+  out <- log_lik_censor("mixcure_weibull", args, i, prep)
+  out <- log_lik_truncate(out, pmixcure_weibull, args, i, prep)
+  log_lik_weight(out, i = i, prep = prep)
+}
+
 log_lik_hurdle_cumulative <- function(i, prep) {
   mu <- get_dpar(prep, "mu", i = i)
   hu <- get_dpar(prep, "hu", i = i)

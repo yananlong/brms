@@ -32,6 +32,37 @@ test_that("log_lik for location shift models works as expected", {
   expect_equal(ll, ll_gaussian * prep$data$weights[1])
 })
 
+test_that("log_lik for mixcure models works correctly", {
+  ns <- 25
+  prep <- structure(list(ndraws = ns, nobs = ns), class = "brmsprep")
+  prep$dpars <- list(
+    mu = matrix(rnorm(ns * 2), ncol = 2),
+    sigma = rgamma(ns, 3),
+    shape = rgamma(ns, 4),
+    inc = runif(ns, 0.1, 0.9)
+  )
+  prep$data <- list(
+    Y = rlnorm(ns),
+    lb = rep(0, ns),
+    ub = rep(Inf, ns)
+  )
+
+  ll_mixcure_lognormal <- dmixcure_lognormal(
+    x = prep$data$Y[1], mu = prep$dpars$mu[, 1],
+    sigma = prep$dpars$sigma, inc = prep$dpars$inc, log = TRUE
+  )
+  ll <- brms:::log_lik_mixcure_lognormal(1, prep = prep)
+  expect_equal(ll, c(ll_mixcure_lognormal))
+
+  scale <- prep$dpars$mu[, 1] / gamma(1 + 1 / prep$dpars$shape)
+  ll_mixcure_weibull <- dmixcure_weibull(
+    x = prep$data$Y[1], shape = prep$dpars$shape,
+    scale = scale, inc = prep$dpars$inc, log = TRUE
+  )
+  ll <- brms:::log_lik_mixcure_weibull(1, prep = prep)
+  expect_equal(ll, c(ll_mixcure_weibull))
+})
+
 test_that("log_lik for various skewed normal models works as expected", {
   ns <- 50
   prep <- structure(list(), class = "brmsprep")

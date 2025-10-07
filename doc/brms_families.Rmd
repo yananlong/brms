@@ -132,6 +132,8 @@ f(y) = h(y) S(y)
 $$
 where $S(y)$ is the survival function implied by $h(y)$.
 
+Mixture-cure models assume that only a subset of the population is susceptible to the event of interest while the remaining individuals are "cured". The families **mixcure_lognormal** and **mixcure_weibull** implement accelerated failure time formulations with lognormal and Weibull latency distributions, respectively. They introduce an incidence parameter that can be predicted on the logit (and other) scales to model the probability of belonging to the susceptible group.
+
 ## Extreme value models
 
 Modeling extremes requires special distributions. One may use the **weibull**
