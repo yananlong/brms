@@ -27,6 +27,8 @@
 \alias{hurdle_negbinomial}
 \alias{hurdle_gamma}
 \alias{hurdle_lognormal}
+\alias{mixcure_lognormal}
+\alias{mixcure_weibull}
 \alias{hurdle_cumulative}
 \alias{zero_inflated_beta}
 \alias{zero_one_inflated_beta}
@@ -122,6 +124,10 @@ hurdle_gamma(link = "log", link_shape = "log", link_hu = "logit")
 
 hurdle_lognormal(link = "identity", link_sigma = "log", link_hu = "logit")
 
+mixcure_lognormal(link = "identity", link_sigma = "log", link_inc = "logit")
+
+mixcure_weibull(link = "log", link_shape = "log", link_inc = "logit")
+
 hurdle_cumulative(
   link = "logit",
   link_hu = "logit",
@@ -200,6 +206,8 @@ information on link functions supported by each family.}
 \item{link_zi}{Link of auxiliary parameter \code{zi} if being predicted.}
 
 \item{link_hu}{Link of auxiliary parameter \code{hu} if being predicted.}
+
+\item{link_inc}{Link of auxiliary parameter \code{inc} if being predicted.}
 
 \item{link_zoi}{Link of auxiliary parameter \code{zoi} if being predicted.}
 

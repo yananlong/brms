@@ -545,6 +545,30 @@
   )
 }
 
+.family_mixcure_lognormal <- function() {
+  list(
+    links = c("identity", "inverse"),
+    dpars = c("mu", "sigma", "inc"), type = "real",
+    ybounds = c(0, Inf), closed = c(TRUE, NA),
+    ad = c("weights", "subset", "cens", "trunc", "index"),
+    include = "fun_mixcure_lognormal.stan",
+    specials = c("logscale", "sbi_inc_logit", "sbi_inc_logit_cdf"),
+    normalized = ""
+  )
+}
+
+.family_mixcure_weibull <- function() {
+  list(
+    links = c("log", "identity", "inverse", "softplus", "squareplus"),
+    dpars = c("mu", "shape", "inc"), type = "real",
+    ybounds = c(0, Inf), closed = c(TRUE, NA),
+    ad = c("weights", "subset", "cens", "trunc", "index"),
+    include = "fun_mixcure_weibull.stan",
+    specials = c("logscale", "sbi_inc_logit", "sbi_inc_logit_cdf"),
+    normalized = ""
+  )
+}
+
 .family_hurdle_cumulative <- function() {
   list(
     links = c(

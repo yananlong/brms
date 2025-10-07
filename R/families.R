@@ -739,6 +739,24 @@ hurdle_lognormal <- function(link = "identity", link_sigma = "log",
 
 #' @rdname brmsfamily
 #' @export
+mixcure_lognormal <- function(link = "identity", link_sigma = "log",
+                              link_inc = "logit") {
+  slink <- substitute(link)
+  .brmsfamily("mixcure_lognormal", link = link, slink = slink,
+              link_sigma = link_sigma, link_inc = link_inc)
+}
+
+#' @rdname brmsfamily
+#' @export
+mixcure_weibull <- function(link = "log", link_shape = "log",
+                            link_inc = "logit") {
+  slink <- substitute(link)
+  .brmsfamily("mixcure_weibull", link = link, slink = slink,
+              link_shape = link_shape, link_inc = link_inc)
+}
+
+#' @rdname brmsfamily
+#' @export
 hurdle_cumulative <- function(link = "logit", link_hu = "logit",
                               link_disc = "log", threshold = "flexible") {
   slink <- substitute(link)
@@ -1356,6 +1374,7 @@ links_dpars <- function(dpar) {
     hu = c("logit", "identity"),
     zoi = c("logit", "identity"),
     coi = c("logit", "identity"),
+    inc = c("logit", "cloglog", "probit", "probit_approx"),
     disc = c("log", "identity", "softplus", "squareplus"),
     bs = c("log", "identity", "softplus", "squareplus"),
     ndt = c("log", "identity", "softplus", "squareplus"),
