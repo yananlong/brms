@@ -347,3 +347,38 @@ where $\alpha$ is the zero-one-inflation probability (i.e. the probability that
 zero or one occurs) and $\gamma$ is the conditional one-inflation probability
 (i.e. the probability that one occurs rather than zero). Currently implemented
 families are **zero_one_inflated_beta**.
+
+## Mixture-cure models
+
+Mixture-cure models assume that the study population is composed of a "cured"
+fraction that will never experience the event of interest and a susceptible
+fraction that follows a standard latency distribution. Let $\pi \in (0, 1)$
+denote the *incidence* parameter, that is, the probability of belonging to the
+susceptible group. In regression terms, $\pi$ is modeled on the logit (or other)
+scale through an additional linear predictor. Conditional on being susceptible,
+event times are modeled with a proper density $f_u(y)$ with survival function
+$S_u(y)$. The resulting improper mixture has density and survival function
+
+$$
+f(y) = \pi f_u(y) \quad \text{for } y > 0, \qquad S(y) = (1 - \pi) + \pi S_u(y),
+$$
+
+so that a point mass of size $1 - \pi$ remains at infinity for the cured
+individuals.
+
+The **mixcure_lognormal** family uses a lognormal latency distribution with
+density
+$$
+f_u(y) = \frac{1}{\sqrt{2\pi} \sigma y} \exp\left(-\frac{1}{2}\left(\frac{\log(y) - \mu}{\sigma}\right)^2\right),
+$$
+where $\sigma$ is the residual standard deviation on the log-scale and $\mu$ is
+obtained from the main linear predictor via the log link. The **mixcure_weibull**
+family instead relies on a Weibull latency distribution with density
+$$
+f_u(y) = \frac{\alpha}{s} \left(\frac{y}{s}\right)^{\alpha-1}
+\exp\left(-\left(\frac{y}{s}\right)^\alpha\right),
+$$
+where $\alpha > 0$ is a shape parameter and $s = \mu / \Gamma(1 + 1 / \alpha)$
+is the scale parameter implied by the main predictor $\mu$. In both cases, the
+incidence parameter $\pi$ can be modeled with its own set of predictors via the
+`incidence` special in the model formula.
