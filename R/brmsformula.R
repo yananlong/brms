@@ -409,7 +409,8 @@
 #'   changed to an integer array. That way, covariates can also be used
 #'   for indexing purposes in Stan.
 #'
-#'   Non-linear models may not be uniquely identified and / or show bad convergence.
+#'   Parameters of non-linear models may not be uniquely identified or the posterior
+#'   inference may have convergence issues.
 #'   For this reason it is mandatory to specify priors on the non-linear parameters.
 #'   For instructions on how to do that, see \code{\link{set_prior}}.
 #'   For some examples of non-linear models, see \code{vignette("brms_nonlinear")}.
@@ -453,8 +454,8 @@
 #'   scale if the can only be within the unit interval.
 #'
 #'   Alternatively, one may fix distributional parameters to certain values.
-#'   However, this is mainly useful when models become too
-#'   complicated and otherwise have convergence issues.
+#'   However, this is mainly useful when a model becomes too
+#'   complicated and posterior inference has convergence issues.
 #'   We thus suggest to be generally careful when making use of this option.
 #'   The \code{quantile} parameter of the \code{asym_laplace} distribution
 #'   is a good example where it is useful. By fixing \code{quantile},
@@ -992,7 +993,7 @@ split_bf <- function(x) {
   resp <- terms_resp(x$formula, check_names = FALSE)
   str_adform <- formula2str(x$formula)
   str_adform <- get_matches("\\|[^~]*(?=~)", str_adform, perl = TRUE)
-  if (length(resp) > 1L) {
+  if (isTRUE(attr(resp, "mvbind"))) {
     # mvbind syntax used to specify MV model
     flist <- named_list(resp)
     for (i in seq_along(resp)) {
@@ -1001,7 +1002,12 @@ split_bf <- function(x) {
       flist[[i]]$formula[[2]] <- parse(text = str_lhs)[[1]]
       flist[[i]]$resp <- resp[[i]]
     }
-    x <- mvbf(flist = flist)
+    if (length(resp) > 1L) {
+      x <- mvbf(flist = flist)
+    } else {
+      # single response with mvbind is just a univariate model
+      x <- flist[[1]]
+    }
   }
   x
 }
