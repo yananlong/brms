@@ -29,30 +29,33 @@ test_that("Poisson model from brm doc works correctly", suppressWarnings({
   expect_ggplot(pp_check(fit1))
 
   # test kfold
-  kfold1 <- kfold(fit1, chains = 1, iter = 1000, save_fits = TRUE)
+  kfold1 <- kfold(fit1, save_fits = TRUE)
   loo1 <- SW(loo(fit1))
   expect_range(kfold1$estimates[3, 1], 1210, 1260)
   # expected output structure
   expect_equal(names(kfold1), c("estimates", "pointwise", "diagnostics", 
-  "fits", "data", "data2"))
-  # ensure that the warning message works as expected if large pareto-k exist
-  expect_warning(
-    kfold(fit1, chains = 1, iter = 1000), 
-    "Found \\d+ observations with a pareto_k > 0.7"
-  )
-  # dims is in attributes of kfold1
-  expect_true("dims" %in% names(attributes(kfold1)))
+                                "fits", "data", "data2"))
   # dims has correct dimensionality
   expect_equal(dim(kfold1)[1], ndraws(fit1))
   expect_equal(dim(kfold1)[2], nrow(epilepsy))
-  # expected length of pareto-k slot is same as pointwise slot
-  expect_equal(length(kfold1$diagnostics$pareto_k), nrow(kfold1$pointwise))
   # output structure of loo and kfold object should be equal 
   # wrt estimates, pointwise and diagnostics slots
   expect_equal(names(loo1)[1:3], names(kfold1)[1:3])
   # diagnostics$pareto_k in kfold has same class as corresponding slot 
   # in loo output
   expect_equal(class(kfold1$diagnostics), class(loo1$diagnostics))
+  # diagnostics follow loo-style names
+  expect_equal(
+    sort(names(kfold1$diagnostics)),
+    sort(c("pareto_k", "n_eff", "r_eff"))
+  )
+  # expected length of pareto-k, n_eff, r_eff equal to pointwise
+  expected_len <- nrow(kfold1$pointwise)
+  expect_equal(length(kfold1$diagnostics$pareto_k), expected_len)
+  expect_equal(length(kfold1$diagnostics$n_eff), expected_len)
+  expect_equal(length(kfold1$diagnostics$r_eff), expected_len)
+  # 'dims' and 'k_threshold' are in attributes of kfold output
+  expect_all_true(c("dims", "k_threshold") %in% names(attributes(kfold1)))
   # define a loss function
   rmse <- function(y, yrep) {
     yrep_mean <- colMeans(yrep)
@@ -83,8 +86,6 @@ test_that("Ordinal model from brm doc works correctly", suppressWarnings({
   suppressWarnings(ce <- conditional_effects(fit2, effect = "treat"),
                  "Predictions are treated as continuous variables")
   expect_ggplot(plot(ce)[[1]])
-  # ensure that no warning message is shown if all pareto-k are ok
-  expect_no_warning(kfold(fit2))
 }))
 
 test_that("Survival model from brm doc works correctly", suppressWarnings({

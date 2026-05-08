@@ -47,9 +47,6 @@
 #' @param future_args A list of further arguments passed to
 #'   \code{\link[future:future]{future}} for additional control over parallel
 #'   execution if activated.
-#' @param k_threshold The Pareto \eqn{k} threshold for which observations
-#'   K-fold CV is likely to be unreliable. Defaults to \code{0.7}.
-#'   See \code{\link[loo:pareto-k-diagnostic]{pareto_k_ids}} for more details.
 #' @param ... Further arguments passed to \code{\link{brm}} and
 #'    \code{\link{log_lik}}.
 #'
@@ -152,21 +149,18 @@
 kfold.brmsfit <- function(x, ..., K = 10, Ksub = NULL, folds = NULL,
                           group = NULL, joint = FALSE, compare = TRUE,
                           resp = NULL, model_names = NULL, save_fits = FALSE,
-                          recompile = NULL, future_args = list(),
-                          k_threshold = 0.7) {
+                          recompile = NULL, future_args = list()) {
   args <- split_dots(x, ..., model_names = model_names)
   if (!"use_stored" %in% names(args)) {
     further_arg_names <- c(
-      "K", "Ksub", "folds", "group", "joint", "resp", "save_fits",
-      "k_threshold"
+      "K", "Ksub", "folds", "group", "joint", "resp", "save_fits"
     )
     args$use_stored <- all(names(args) %in% "models") &&
       !any(further_arg_names %in% names(match.call()))
   }
   c(args) <- nlist(
     criterion = "kfold", K, Ksub, folds, group, joint,
-    compare, resp, save_fits, recompile, future_args,
-    k_threshold
+    compare, resp, save_fits, recompile, future_args
   )
   do_call(compute_loolist, args)
 }
@@ -176,8 +170,7 @@ kfold.brmsfit <- function(x, ..., K = 10, Ksub = NULL, folds = NULL,
 # @param model_name ignored but included to avoid being passed to '...'
 .kfold <- function(x, K, Ksub, folds, group, joint, save_fits,
                    newdata, resp, model_name, recompile = NULL,
-                   future_args = list(), newdata2 = NULL,
-                   k_threshold = 0.7, ...) {
+                   future_args = list(), newdata2 = NULL, ...) {
   stopifnot(is.brmsfit(x), is.list(future_args))
   if (is.brmsfit_multiple(x)) {
     warn_brmsfit_multiple(x)
@@ -347,11 +340,12 @@ kfold.brmsfit <- function(x, ..., K = 10, Ksub = NULL, folds = NULL,
   }
 
   lppds <- do_call(cbind, lppds)
-  # pareto_k for each column of lppds (i.e. each predicted observation)
-  diagnostics$pareto_k <- apply(
-    lppds, 2, posterior::pareto_khat,
-    are_log_weights = TRUE
-  )
+
+  diagnostics$pareto_k <- apply(lppds, 2, posterior::pareto_khat,
+                                are_log_weights = TRUE)
+  diagnostics$n_eff <- apply(exp(lppds), 2, posterior::ess_mean)
+  diagnostics$r_eff <- diagnostics$n_eff / nrow(lppds)
+
   elpds <- apply(lppds, 2, log_mean_exp)
   pred_obs <- unlist(pred_obs_list)
   if (joint == "obs") {
@@ -405,7 +399,8 @@ kfold.brmsfit <- function(x, ..., K = 10, Ksub = NULL, folds = NULL,
   estimates <- cbind(Estimate = est, SE = se_est)
   rownames(estimates) <- colnames(pointwise)
   out <- nlist(estimates, pointwise, diagnostics)
-  atts <- nlist(K, Ksub, group, folds, fold_type, joint)
+  k_threshold <- min(posterior::ps_khat_threshold(nrow(lppds)), 0.7)
+  atts <- nlist(K, Ksub, group, folds, fold_type, joint, k_threshold)
   attributes(out)[names(atts)] <- atts
   if (save_fits) {
     out$fits <- fits
@@ -509,3 +504,4 @@ validate_joint <- function(joint) {
   options <- c("obs", "fold", "group")
   match.arg(joint, options)
 }
+
